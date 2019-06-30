@@ -1,6 +1,12 @@
 # wasm-hnpwa
 
-> HNPWA for WebAssembly
+> HNPWA with WASM
+
+# How to run
+
+```sh
+npx http-server .
+```
 
 # License
 
