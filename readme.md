@@ -2,9 +2,10 @@
 
 > HNPWA with WASM
 
-# How to run
+# How to build and run
 
 ```sh
+wasm-pack build --target web
 npx http-server .
 ```
 

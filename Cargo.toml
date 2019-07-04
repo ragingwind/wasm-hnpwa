@@ -4,4 +4,38 @@ version = "0.1.0"
 authors = ["Jimmy Moon <ragingwind@gmail.com>"]
 edition = "2018"
 
+[lib]
+crate-type = ["cdylib"]
+
 [dependencies]
+futures = "0.1.20"
+js-sys = "0.3.24"
+wasm-bindgen = { version = "0.2.47", features = ["serde-serialize"]  }
+wasm-bindgen-futures = "0.3.24"
+serde = { version = "1.0.80", features = ["derive"] }
+serde_derive = "^1.0.59"
+console_error_panic_hook = "0.1.5"
+
+[dependencies.web-sys]
+version = "0.3.4"
+features = [
+  'console',
+  'CssStyleDeclaration',
+  'Document',
+  'Element',
+  'Event',
+  'EventTarget',
+  'HtmlBodyElement',
+  'HtmlElement',
+  'KeyboardEvent',
+  'Location',
+  'Node',
+  'NodeList',
+  'Storage',
+  'Headers',
+  'Request',
+  'RequestInit',
+  'RequestMode',
+  'Response',
+  'Window'
+]

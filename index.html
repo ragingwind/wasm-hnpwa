@@ -105,6 +105,21 @@
       <a href="?page=2">More...</a>
     </footer>
   </header>
+
+  <script type="module">
+    import init from './pkg/wasm_hnpwa.js';
+
+    async function run() {
+      const d = await init();
+      try {
+        console.log('w', await d.run());
+      } catch (e) {
+        console.log(e);
+      }
+    }
+
+    run();
+  </script>
 </body>
 
 </html>
