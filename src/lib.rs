@@ -9,6 +9,8 @@ use wasm_bindgen_futures::future_to_promise;
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{Request, RequestInit, RequestMode, Response};
 
+use std::sync::{Mutex, MutexGuard};
+
 #[wasm_bindgen]
 extern "C" {
   #[wasm_bindgen(js_namespace = console)]
@@ -74,16 +76,38 @@ fn fetch(ep: &String) -> Promise {
   future_to_promise(future)
 }
 
+use lazy_static::*;
+lazy_static! {
+    /// This is an example for using doc comment attributes
+    // static ref EXAMPLE: u8 = 42;
+    static ref NEWS: Mutex<Vec<News>> = Mutex::new(vec![]);
+
+    static ref POOL: Mutex<Vec<u32>> = Mutex::new(vec![]);
+}
+
+fn get_pool<'a>() -> MutexGuard<'a, Vec<u32>> {
+  POOL.lock().unwrap()
+}
+
+fn get_news<'a>() -> MutexGuard<'a, Vec<News>> {
+  NEWS.lock().unwrap()
+}
+
 fn app() {
-  let mut contorller = Controller::new();
+  // let mut contorller = Controller::new();
+  let mut latest: Vec<News> = vec![];
 
   let cb = Closure::wrap(Box::new(move |json: JsValue| {
-    contorller.latest = json.into_serde().unwrap();
-    console_log!("{:?}", contorller.latest)
+    latest = json.into_serde().unwrap();
+    get_news().clone_from(&latest);
+    console_log!("{:?}", get_news());
+    // console_log!("{:?}", latest)
   }) as Box<FnMut(JsValue)>);
 
   let url = String::from("https://api.hnpwa.com/v0/news/1.json");
   fetch(&url).then(&cb);
+
+  console_log!("{:?}", get_news());
 
   cb.forget();
 }
