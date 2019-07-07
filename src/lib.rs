@@ -7,9 +7,7 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::future_to_promise;
 use wasm_bindgen_futures::JsFuture;
-use web_sys::{Request, RequestInit, RequestMode, Response};
-
-use std::sync::{Mutex, MutexGuard};
+use web_sys::{CustomEvent, CustomEventInit, Request, RequestInit, RequestMode, Response};
 
 #[wasm_bindgen]
 extern "C" {
@@ -51,6 +49,10 @@ impl Controller {
       latest: RefCell::new(Vec::new()),
     }
   }
+
+  pub fn starts() {
+    console_log!("controller starts()");
+  }
 }
 
 fn fetch(ep: &String) -> Promise {
@@ -76,44 +78,38 @@ fn fetch(ep: &String) -> Promise {
   future_to_promise(future)
 }
 
-use lazy_static::*;
-lazy_static! {
-    /// This is an example for using doc comment attributes
-    // static ref EXAMPLE: u8 = 42;
-    static ref NEWS: Mutex<Vec<News>> = Mutex::new(vec![]);
+#[wasm_bindgen]
+pub struct ClosureHandle(Closure<FnMut(JsValue)>);
 
-    static ref POOL: Mutex<Vec<u32>> = Mutex::new(vec![]);
-}
-
-fn get_pool<'a>() -> MutexGuard<'a, Vec<u32>> {
-  POOL.lock().unwrap()
-}
-
-fn get_news<'a>() -> MutexGuard<'a, Vec<News>> {
-  NEWS.lock().unwrap()
-}
-
-fn app() {
-  // let mut contorller = Controller::new();
-  let mut latest: Vec<News> = vec![];
-
+#[wasm_bindgen]
+pub fn prepare() -> ClosureHandle {
+  console_error_panic_hook::set_once();
+  let mut contorller = Controller::new();
   let cb = Closure::wrap(Box::new(move |json: JsValue| {
-    latest = json.into_serde().unwrap();
-    get_news().clone_from(&latest);
-    console_log!("{:?}", get_news());
-    // console_log!("{:?}", latest)
+    contorller.latest = json.into_serde().unwrap();
+    send_event();
   }) as Box<FnMut(JsValue)>);
 
   let url = String::from("https://api.hnpwa.com/v0/news/1.json");
   fetch(&url).then(&cb);
 
-  console_log!("{:?}", get_news());
+  ClosureHandle(cb)
+}
 
-  cb.forget();
+fn send_event() {
+  let d = JsValue::from_serde("{data:{name:'name'}}").unwrap();
+  let mut i = CustomEventInit::new();
+  i.detail(&d);
+
+  let e = CustomEvent::new_with_event_init_dict("app", &i).unwrap();
+
+  let window = web_sys::window().unwrap();
+  let document = window.document().unwrap();
+
+  document.dispatch_event(&e).unwrap();
 }
 
 #[wasm_bindgen]
 pub fn run() {
-  console_error_panic_hook::set_once();
-  app();
+  send_event();
 }

@@ -24,6 +24,8 @@ features = [
   'CssStyleDeclaration',
   'Document',
   'Element',
+  'CustomEvent',
+  'CustomEventInit',
   'Event',
   'EventTarget',
   'HtmlBodyElement',

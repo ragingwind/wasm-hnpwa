@@ -107,19 +107,25 @@
   </header>
 
   <script type="module">
-    import init from './pkg/wasm_hnpwa.js';
+    import boot from './pkg/wasm_hnpwa.js';
 
-    async function run() {
-      const d = await init();
+    document.addEventListener('app', e => {
+      console.log('event', e);
+    });
+
+    async function start() {
+      const app = await boot();
       try {
-        console.log('w', await d.run());
+        const v = await app.prepare();
+        console.log(v);
+        await app.run();
       } catch (e) {
         console.log(e);
       }
     }
 
-    run();
+    start();
   </script>
 </body>
 
-</html>
+</htmlrun
