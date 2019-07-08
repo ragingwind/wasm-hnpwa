@@ -96,8 +96,14 @@ pub fn prepare() -> ClosureHandle {
   ClosureHandle(cb)
 }
 
+#[derive(Serialize)]
+pub struct Detail<T> {
+  data: T,
+}
+
 fn send_event() {
-  let d = JsValue::from_serde("{data:{name:'name'}}").unwrap();
+  let detail = Detail { data: "name" };
+  let d = JsValue::from_serde(&detail).unwrap();
   let mut i = CustomEventInit::new();
   i.detail(&d);
 
