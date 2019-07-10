@@ -16,6 +16,7 @@ serde = { version = "1.0.80", features = ["derive"] }
 serde_derive = "^1.0.59"
 console_error_panic_hook = "0.1.5"
 lazy_static = "0.2.8"
+serde_json = "1.0"
 
 [dependencies.web-sys]
 version = "0.3.4"

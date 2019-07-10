@@ -1,28 +1,28 @@
 use std::cell::RefCell;
 
 use futures::{future, Future};
-use js_sys::Promise;
+use js_sys::{Function, Promise};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::future_to_promise;
 use wasm_bindgen_futures::JsFuture;
-use web_sys::{CustomEvent, CustomEventInit, Request, RequestInit, RequestMode, Response};
+use web_sys::{Request, RequestInit, RequestMode, Response};
+
+use serde_json::{Result, Value};
+
+#[macro_use]
+mod console;
+mod event;
+mod fetch;
+
+use crate::event::send_event;
+// use crate::fetch::*;
 
 #[wasm_bindgen]
 extern "C" {
-  #[wasm_bindgen(js_namespace = console)]
-  fn log(s: &str);
-
-  #[wasm_bindgen(js_namespace = console, js_name=log)]
-  fn log_u32(a: u32);
-
-  #[wasm_bindgen(js_namespace = console, js_name=log)]
-  fn log_many(a: &str, b: &str);
-}
-
-macro_rules! console_log {
-    ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
+  #[wasm_bindgen(js_namespace = window)]
+  pub fn fetch(url: &str) -> Promise;
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -33,11 +33,16 @@ pub struct News {
   pub user: Option<String>,
   pub time: u64,
   pub time_ago: String,
-  pub comments_count: u32,
+  pub comments_count: u64,
   pub r#type: String,
   pub url: String,
   pub domain: Option<String>,
 }
+
+// #[derive(Debug, Serialize, Deserialize, Clone)]
+// pub struct Newss {
+
+// }
 
 pub struct Controller {
   latest: RefCell<Vec<News>>,
@@ -55,67 +60,100 @@ impl Controller {
   }
 }
 
-fn fetch(ep: &String) -> Promise {
-  let mut opts = RequestInit::new();
-  opts.method("GET");
-  opts.mode(RequestMode::Cors);
-
-  let request = Request::new_with_str_and_init(ep, &opts).unwrap();
-
-  request.headers().set("Accept", "application/json").unwrap();
-
-  let window = web_sys::window().unwrap();
-  let request_promise = window.fetch_with_request(&request);
-  let future = JsFuture::from(request_promise)
-    .and_then(|resp_value| {
-      assert!(resp_value.is_instance_of::<Response>());
-      let resp: Response = resp_value.dyn_into().unwrap();
-      resp.json()
-    })
-    .and_then(|json_value: Promise| JsFuture::from(json_value))
-    .and_then(|json| future::ok(json));
-
-  future_to_promise(future)
+#[derive(Serialize)]
+struct Detail<T> {
+  data: T,
 }
 
 #[wasm_bindgen]
 pub struct ClosureHandle(Closure<FnMut(JsValue)>);
 
 #[wasm_bindgen]
-pub fn prepare() -> ClosureHandle {
-  console_error_panic_hook::set_once();
+pub fn initialize() -> js_sys::Promise {
   let mut contorller = Controller::new();
   let cb = Closure::wrap(Box::new(move |json: JsValue| {
     contorller.latest = json.into_serde().unwrap();
-    send_event();
+
+    let detail = JsValue::from_serde(&Detail { data: "name" }).unwrap();
+    send_event(&detail);
   }) as Box<FnMut(JsValue)>);
 
   let url = String::from("https://api.hnpwa.com/v0/news/1.json");
-  fetch(&url).then(&cb);
+  let url2 = String::from("https://api.hnpwa.com/v0/news/1.json");
+  // Fetch::get_json(&url).then(&cb);
+  let pr: Promise = fetch(&url);
+  let pr2: Promise = fetch(&url2);
+  let pa = js_sys::Array::new();
+  pa.push(&JsValue::from(pr));
+  pa.push(&JsValue::from(pr2));
+  // let future = JsFuture::from(pr)
+  let res = JsFuture::from(Promise::all(&pa))
+    .and_then(|resp_value| {
+      console_log!("{:?}", resp_value);
+      // assert!(resp_value.is_instance_of::<Response>());
+      let arr: js_sys::Array = resp_value.dyn_into().unwrap();
+      let resp = js_sys::Array::new();
+      // let mut resp: [Promise; 2] = [
+      //   Promise::resolve(&JsValue::NULL),
+      //   Promise::resolve(&JsValue::NULL),
+      // ];
+      let mut i = 0;
+      for v in &arr.values() {
+        console_log!("v, {:?}", v);
+        let rr: Response = v.unwrap().dyn_into().unwrap();
+        // let v: Vec<News> = v.unwrap().into_serde().unwrap();
+        resp.push(&rr.json().unwrap());
 
-  ClosureHandle(cb)
-}
+        // console_log!("resp, {:?}", resp[i]);
+        i += 1;
+        // console_log!("v, {:?}", v);
+        // let n: Value = v.unwrap().into_serde().unwrap();
+        // let r: Vec<News> = v.unwrap().into_serde().unwrap();
+        // console_log!("arr1, {:?}", n);
+      }
 
-#[derive(Serialize)]
-pub struct Detail<T> {
-  data: T,
-}
+      future::ok(Promise::all(&resp))
+      // let json: News = resp_value.into_serde().unwrap();
+      // console_log!("arr, {:?}", arr.values());
+      // future::ok(json)
 
-fn send_event() {
-  let detail = Detail { data: "name" };
-  let d = JsValue::from_serde(&detail).unwrap();
-  let mut i = CustomEventInit::new();
-  i.detail(&d);
+      // let data = r#"
+      //   {
+      //       "name": "John Doe",
+      //       "age": 43,
+      //       "phones": [
+      //           "+44 1234567",
+      //           "+44 2345678"
+      //       ]
+      //   }"#;
 
-  let e = CustomEvent::new_with_event_init_dict("app", &i).unwrap();
+      // let v: Value = serde_json::from_str(data).unwrap();
+      // console_log!("arr1, {:?}", v);
 
-  let window = web_sys::window().unwrap();
-  let document = window.document().unwrap();
+      // future::ok("OK")
+    })
+    // .and_then(|json_value: Promise| JsFuture::from(json_value))
+    .and_then(|json_value: Promise| JsFuture::from(json_value))
+    .and_then(|json| {
+      // console_log!("json, {:?}", json);
 
-  document.dispatch_event(&e).unwrap();
+      let arr: js_sys::Array = json.dyn_into().unwrap();
+      for v in &arr.values() {
+        // console_log!("json, {:?}", v);
+        let j: Vec<News> = v.unwrap().into_serde().unwrap();
+        console_log!("json, {:?}", j[0].title);
+      }
+
+      future::ok(JsValue::from("OK"))
+    });
+
+  future_to_promise(res)
+
+  // ClosureHandle(cb)
 }
 
 #[wasm_bindgen]
 pub fn run() {
-  send_event();
+  console_error_panic_hook::set_once();
+  console_log!("start");
 }
