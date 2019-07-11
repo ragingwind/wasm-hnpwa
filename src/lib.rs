@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::future_to_promise;
+use wasm_bindgen_futures::JsFuture;
 
 #[macro_use]
 mod console;
@@ -57,10 +58,7 @@ struct Detail<T> {
 }
 
 #[wasm_bindgen]
-pub struct ClosureHandle(Closure<FnMut(JsValue)>);
-
-#[wasm_bindgen]
-pub fn initialize() -> ClosureHandle {
+pub fn initialize() -> Promise {
   let urls: Vec<String> = vec![
     String::from("https://api.hnpwa.com/v0/news/1.json"),
     String::from("https://api.hnpwa.com/v0/newest/1.json"),
@@ -69,17 +67,17 @@ pub fn initialize() -> ClosureHandle {
     String::from("https://api.hnpwa.com/v0/jobs/1.json"),
   ];
 
-  let cb = Closure::wrap(Box::new(|jsons: JsValue| {
-    let jsons1: Array = jsons.dyn_into().unwrap();
-    for json in &jsons1.values() {
+  let future = Fetch::get_jsons(&urls).then(|jsons_p| {
+    let jsons: Array = jsons_p.unwrap().dyn_into().unwrap();
+    for json in &jsons.values() {
       let j: Vec<News> = json.unwrap().into_serde().unwrap();
       console_log!("json, {:?}", j[0].title);
     }
-  }) as Box<FnMut(JsValue)>);
 
-  Fetch::get_jsons(&urls).then(&cb);
+    future::ok(JsValue::from(jsons))
+  });
 
-  ClosureHandle(cb)
+  future_to_promise(future)
 }
 
 #[wasm_bindgen]

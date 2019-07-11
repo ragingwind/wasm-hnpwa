@@ -38,7 +38,7 @@ impl Fetch {
     future_to_promise(future)
   }
 
-  pub fn get_jsons(urls: &Vec<String>) -> Promise {
+  pub fn get_jsons(urls: &Vec<String>) -> JsFuture {
     let fetches = Array::new();
 
     for u in urls {
@@ -57,10 +57,8 @@ impl Fetch {
 
         future::ok(Promise::all(&jsons))
       })
-      .and_then(|jsons: Promise| JsFuture::from(jsons))
-      .and_then(|jsons| future::ok(jsons));
+      .and_then(|jsons: Promise| JsFuture::from(jsons));
 
-    future_to_promise(future)
-    // JsFuture::from(future_to_promise(future))
+    JsFuture::from(future_to_promise(future))
   }
 }
