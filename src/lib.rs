@@ -6,7 +6,6 @@ use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::future_to_promise;
-use wasm_bindgen_futures::JsFuture;
 
 #[macro_use]
 mod console;
@@ -15,12 +14,6 @@ mod fetch;
 
 use crate::event::send_event;
 use crate::fetch::*;
-
-#[wasm_bindgen]
-extern "C" {
-  #[wasm_bindgen(js_namespace = window)]
-  pub fn fetch(url: &str) -> Promise;
-}
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct News {
@@ -36,48 +29,102 @@ pub struct News {
   pub domain: Option<String>,
 }
 
+#[derive(Clone)]
+pub struct Store {
+  news: RefCell<Vec<News>>,
+  newest: RefCell<Vec<News>>,
+  ask: RefCell<Vec<News>>,
+  show: RefCell<Vec<News>>,
+  jobs: RefCell<Vec<News>>,
+}
+
+enum Endpoint {
+  News,
+  Newest,
+  Ask,
+  Show,
+  Jobs,
+}
+
+impl Endpoint {
+  pub fn as_str(&self, page: u32) -> String {
+    match self {
+      Endpoint::News => format!("https://api.hnpwa.com/v0/news/{}.json", page),
+      Endpoint::Newest => format!("https://api.hnpwa.com/v0/newest/{}.json", page),
+      Endpoint::Ask => format!("https://api.hnpwa.com/v0/ask/{}.json", page),
+      Endpoint::Show => format!("https://api.hnpwa.com/v0/show/{}.json", page),
+      Endpoint::Jobs => format!("https://api.hnpwa.com/v0/jobs/{}.json", page),
+    }
+  }
+}
+
+impl Store {
+  pub fn new() -> Store {
+    Store {
+      news: RefCell::new(Vec::new()),
+      newest: RefCell::new(Vec::new()),
+      ask: RefCell::new(Vec::new()),
+      show: RefCell::new(Vec::new()),
+      jobs: RefCell::new(Vec::new()),
+    }
+  }
+
+  pub fn get_endpoints(&self, page: u32) -> Vec<String> {
+    vec![
+      Endpoint::News.as_str(page).into(),
+      Endpoint::Newest.as_str(page).into(),
+      Endpoint::Ask.as_str(page).into(),
+      Endpoint::Show.as_str(page).into(),
+      Endpoint::Jobs.as_str(page).into(),
+    ]
+  }
+
+  pub fn update(&self, page: u32) -> Promise {
+    let future = Fetch::get_jsons(&self.get_endpoints(page)).then(|jsons_p| {
+      let jsons: Array = jsons_p.unwrap().dyn_into().unwrap();
+      for json in &jsons.values() {
+        let j: Vec<News> = json.unwrap().into_serde().unwrap();
+        console_log!("json, {:?}", j[0].title);
+      }
+
+      future::ok(JsValue::from(jsons))
+    });
+
+    future_to_promise(future)
+  }
+
+  pub fn initialize(&self) -> Promise {
+    self.update(1)
+  }
+}
 pub struct Controller {
-  latest: RefCell<Vec<News>>,
+  store: Store,
+  active_route: String,
 }
 
 impl Controller {
-  pub fn new() -> Controller {
+  pub fn new(store: Store) -> Controller {
     Controller {
-      latest: RefCell::new(Vec::new()),
+      store,
+      active_route: "".into(),
     }
   }
 
-  pub fn starts() {
-    console_log!("controller starts()");
+  pub fn initialize(&self) {
+    console_log!("Controller::iinitialize");
+    self.store.initialize();
   }
-}
-
-#[derive(Serialize)]
-struct Detail<T> {
-  data: T,
 }
 
 #[wasm_bindgen]
-pub fn initialize() -> Promise {
-  let urls: Vec<String> = vec![
-    String::from("https://api.hnpwa.com/v0/news/1.json"),
-    String::from("https://api.hnpwa.com/v0/newest/1.json"),
-    String::from("https://api.hnpwa.com/v0/ask/1.json"),
-    String::from("https://api.hnpwa.com/v0/show/1.json"),
-    String::from("https://api.hnpwa.com/v0/jobs/1.json"),
-  ];
+pub struct ClosureHandle(Closure<FnMut(JsValue)>);
 
-  let future = Fetch::get_jsons(&urls).then(|jsons_p| {
-    let jsons: Array = jsons_p.unwrap().dyn_into().unwrap();
-    for json in &jsons.values() {
-      let j: Vec<News> = json.unwrap().into_serde().unwrap();
-      console_log!("json, {:?}", j[0].title);
-    }
+#[wasm_bindgen]
+pub fn initialize() {
+  let store: Store = Store::new();
+  let controller: Controller = Controller::new(store);
 
-    future::ok(JsValue::from(jsons))
-  });
-
-  future_to_promise(future)
+  controller.initialize();
 }
 
 #[wasm_bindgen]
