@@ -1,4 +1,5 @@
 use std::cell::RefCell;
+use std::rc::{Rc, Weak};
 
 use futures::{future, Future};
 use js_sys::{Array, Promise};
@@ -97,22 +98,32 @@ impl Store {
     self.update(1)
   }
 }
+
 pub struct Controller {
   store: Store,
+  view: RefCell<Option<Weak<View>>>,
   active_route: String,
 }
 
 impl Controller {
-  pub fn new(store: Store) -> Controller {
+  pub fn new(store: Store, view: Weak<View>) -> Controller {
     Controller {
       store,
+      view: RefCell::new(Some(view)),
       active_route: "".into(),
     }
   }
 
-  pub fn initialize(&self) {
-    console_log!("Controller::iinitialize");
-    self.store.initialize();
+  pub fn initialize(&self) -> Promise {
+    self.store.initialize()
+  }
+}
+
+pub struct View {}
+
+impl View {
+  pub fn new() -> View {
+    View {}
   }
 }
 
@@ -120,11 +131,12 @@ impl Controller {
 pub struct ClosureHandle(Closure<FnMut(JsValue)>);
 
 #[wasm_bindgen]
-pub fn initialize() {
+pub fn initialize() -> Promise {
   let store: Store = Store::new();
-  let controller: Controller = Controller::new(store);
+  let view = Rc::new(View::new());
 
-  controller.initialize();
+  let controller: Controller = Controller::new(store.clone(), Rc::downgrade(&view));
+  controller.initialize()
 }
 
 #[wasm_bindgen]
