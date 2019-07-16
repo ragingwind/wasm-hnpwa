@@ -93,30 +93,6 @@ impl Store {
 
     future_to_promise(future)
   }
-
-  pub fn initialize(&self) -> Promise {
-    self.update(1)
-  }
-}
-
-pub struct Controller {
-  store: Store,
-  view: RefCell<Option<Weak<View>>>,
-  active_route: String,
-}
-
-impl Controller {
-  pub fn new(store: Store, view: Weak<View>) -> Controller {
-    Controller {
-      store,
-      view: RefCell::new(Some(view)),
-      active_route: "".into(),
-    }
-  }
-
-  pub fn initialize(&self) -> Promise {
-    self.store.initialize()
-  }
 }
 
 pub struct View {}
@@ -127,16 +103,46 @@ impl View {
   }
 }
 
+pub struct Controller {
+  store: RefCell<Rc<Store>>,
+  view: RefCell<Rc<View>>,
+  active_route: String,
+}
+
+impl Controller {
+  pub fn new(view: Rc<View>, store: Rc<Store>) -> Controller {
+    Controller {
+      store: RefCell::new(store),
+      view: RefCell::new(view),
+      active_route: "".into(),
+    }
+  }
+
+  pub fn init(&self) -> Promise {
+    if let Ok(mut store) = self.store.try_borrow_mut() {
+      store.update(1)
+    } else {
+      Promise::reject(&JsValue::from_str("failed"))
+    }
+  }
+}
+
 #[wasm_bindgen]
 pub struct ClosureHandle(Closure<FnMut(JsValue)>);
 
 #[wasm_bindgen]
-pub fn initialize() -> Promise {
-  let store: Store = Store::new();
+pub fn start() {
+  let store = Rc::new(Store::new());
   let view = Rc::new(View::new());
+  let controller: Controller = Controller::new(view.clone(), store.clone());
 
-  let controller: Controller = Controller::new(store.clone(), Rc::downgrade(&view));
-  controller.initialize()
+  let done = Closure::wrap(Box::new(|v: JsValue| {
+    console_log!("done {:?}", v);
+  }) as Box<FnMut(JsValue)>);
+
+  controller.init().then(&done);
+
+  done.forget();
 }
 
 #[wasm_bindgen]
