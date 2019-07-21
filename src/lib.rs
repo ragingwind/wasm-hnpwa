@@ -103,15 +103,25 @@ impl View {
   }
 }
 
-pub struct Controller {
+pub struct Controller {}
+
+impl Controller {
+  pub fn new() -> Controller {
+    Controller {}
+  }
+}
+
+pub struct App {
+  controller: RefCell<Rc<Controller>>,
   store: RefCell<Rc<Store>>,
   view: RefCell<Rc<View>>,
   active_route: String,
 }
 
-impl Controller {
-  pub fn new(view: Rc<View>, store: Rc<Store>) -> Controller {
-    Controller {
+impl App {
+  pub fn new(controller: Rc<Controller>, store: Rc<Store>, view: Rc<View>) -> App {
+    App {
+      controller: RefCell::new(controller),
       store: RefCell::new(store),
       view: RefCell::new(view),
       active_route: "".into(),
@@ -119,7 +129,7 @@ impl Controller {
   }
 
   pub fn init(&self) -> Promise {
-    if let Ok(mut store) = self.store.try_borrow_mut() {
+    if let Ok(store) = self.store.try_borrow_mut() {
       store.update(1)
     } else {
       Promise::reject(&JsValue::from_str("failed"))
@@ -134,13 +144,14 @@ pub struct ClosureHandle(Closure<FnMut(JsValue)>);
 pub fn start() {
   let store = Rc::new(Store::new());
   let view = Rc::new(View::new());
-  let controller: Controller = Controller::new(view.clone(), store.clone());
+  let controller = Rc::new(Controller::new());
+  let app: App = App::new(controller.clone(), store.clone(), view.clone());
 
   let done = Closure::wrap(Box::new(|v: JsValue| {
     console_log!("done {:?}", v);
   }) as Box<FnMut(JsValue)>);
 
-  controller.init().then(&done);
+  app.init().then(&done);
 
   done.forget();
 }
