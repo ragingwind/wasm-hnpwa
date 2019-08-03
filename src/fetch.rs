@@ -1,5 +1,5 @@
 use futures::{future, Future};
-use js_sys::{Array, Promise};
+use js_sys::{Array, Map, Promise};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::future_to_promise;
@@ -28,7 +28,6 @@ impl Fetch {
     let request_promise = window.fetch_with_request(&request);
     let future = JsFuture::from(request_promise)
       .and_then(|resp_value| {
-        assert!(resp_value.is_instance_of::<Response>());
         let resp: Response = resp_value.dyn_into().unwrap();
         resp.json()
       })

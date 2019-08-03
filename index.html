@@ -116,9 +116,8 @@
     async function start() {
       const app = await boot();
       try {
-        const v = app.start();
-        console.log('init', v);
-        // await app.run();
+        await app.run();
+        console.log('init');
       } catch (e) {
         console.log(e);
       }
