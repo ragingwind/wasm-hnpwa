@@ -1,5 +1,5 @@
 use futures::{future, Future};
-use js_sys::{Array, Map, Promise};
+use js_sys::{Array, Promise};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::future_to_promise;
