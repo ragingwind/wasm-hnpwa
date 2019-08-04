@@ -17,7 +17,7 @@
       position: fixed;
       display: flex;
       top: 0;
-      height: 5vh;
+      height: 48px;
     }
 
     nav h1 {
@@ -45,8 +45,8 @@
 
     section ul {
       width: 100vw;
-      margin: 0;
-      padding: 12px 0;
+      margin: 40px 0;
+      padding: 16px 0 0;
     }
 
     section ul li {
@@ -86,25 +86,14 @@
         <li>JOBS</li>
       </ul>
     </nav>
-    <section>
-      <ul>
-        <li>
-          <div class="like_count">1</div>
-          <div>
-            <div class="title">
-              I was seven words away from being spear-phished
-            </div>
-            <div class="info">
-              <div>bookofjoe | 103 comments</div>
-            </div>
-          </div>
-        </li>
-      </ul>
-    </section>
-    <footer>
-      <a href="?page=2">More...</a>
-    </footer>
   </header>
+  <section>
+    <ul>
+    </ul>
+  </section>
+  <footer>
+    <a href="?page=2">More...</a>
+  </footer>
 
   <script type="module">
     import boot from './pkg/wasm_hnpwa.js';
@@ -117,13 +106,13 @@
       const app = await boot();
       try {
         await app.run();
-        console.log('init');
       } catch (e) {
         console.log(e);
       }
     }
-
-    start();
+    document.addEventListener("DOMContentLoaded", () => {
+      start();
+    })
   </script>
 </body>
 
