@@ -88,7 +88,7 @@ impl App {
 
     let event = {
       if let Ok(mut events) = self.events.try_borrow_mut() {
-        console_log(&format!("event pop"));
+        console_log!("event pop");
         Some(events.pop())
       } else {
         None

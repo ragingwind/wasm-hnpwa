@@ -43,7 +43,7 @@ impl Controller {
         let mut store_ref = STORE.lock().unwrap();
         store_ref.news.extend(data.iter().cloned());
 
-        console_log(&format!("get_json {:?}", store_ref.news[0]));
+        console_log!("get_json {:?}", store_ref.news[0]);
         if let Ok(app) = &(app.try_borrow_mut()) {
           app.add_message(Message::View(ViewMessage::ShowNews(store_ref.news.clone())));
         }

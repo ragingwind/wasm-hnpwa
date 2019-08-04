@@ -12,11 +12,7 @@ extern "C" {
   pub fn log_many(a: &str, b: &str);
 }
 
-// #[macro_export]
-// macro_rules! console_log {
-//   ($($t:tt)*) => (console::log(&format_args!($($t)*).to_string()))
-// }
-
-pub fn console_log(str: &String) {
-  log(&str.to_string())
+#[macro_export]
+macro_rules! console_log {
+  ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
 }

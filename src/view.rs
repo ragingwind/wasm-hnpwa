@@ -51,7 +51,7 @@ impl View {
   pub fn show_news(&mut self, news: Vec<News>) {
     if let Some(mut ul) = Element::qs("section ul") {
       for item in news.iter() {
-        console_log(&format!("{:?}", item.title));
+        console_log!("{:?}", item.title);
         if let Some(mut li) = Element::create_element("li") {
           li.set_inner_html(
             format!(
