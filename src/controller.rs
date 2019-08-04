@@ -49,7 +49,7 @@ impl Controller {
         }
       }) as Box<FnMut(JsValue)>);
 
-      Fetch::get_json(&Endpoint::News.as_str(1)).then(&done);
+      Fetch::get_json(&Endpoint::News.as_str(page)).then(&done);
       done.forget();
     };
 
