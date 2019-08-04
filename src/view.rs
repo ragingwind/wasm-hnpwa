@@ -1,6 +1,7 @@
 pub mod element;
 
-use crate::app::{App, Message};
+use super::console::*;
+use crate::app::App;
 // use crate::controller::ControllerMessage;
 use crate::store::News;
 use crate::view::element::Element;
@@ -18,7 +19,8 @@ pub struct View {
 
 impl View {
   pub fn new(app: Rc<App>) -> View {
-    let body = Element::qs("header").unwrap();
+    let body = Element::qs("body").unwrap();
+
     View {
       body,
       app: RefCell::new(app),
@@ -46,5 +48,22 @@ impl View {
     }
   }
 
-  pub fn show_news(&self, news: Vec<News>) {}
+  pub fn show_news(&mut self, news: Vec<News>) {
+    if let Some(mut ul) = Element::qs("section ul") {
+      for item in news.iter() {
+        console_log(&format!("{:?}", item.title));
+        if let Some(mut li) = Element::create_element("li") {
+          li.set_inner_html(
+            format!(
+              "<li><div><a href={:?} target='_blank'>{:?}<a></div></li>",
+              item.url, item.title
+            )
+            .to_string(),
+          );
+
+          ul.append_child(&mut li);
+        }
+      }
+    }
+  }
 }

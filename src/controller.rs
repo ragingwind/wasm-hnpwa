@@ -1,12 +1,12 @@
+use super::console::*;
 use crate::app::{App, Message};
 use crate::fetch::*;
 use crate::store::*;
+use crate::view::ViewMessage;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::Mutex;
 use wasm_bindgen::prelude::*;
-
-use super::console::*;
 
 lazy_static! {
   static ref STORE: Mutex<Store> = Mutex::new(Store::new());
@@ -45,7 +45,7 @@ impl Controller {
 
         console_log(&format!("get_json {:?}", store_ref.news[0]));
         if let Ok(app) = &(app.try_borrow_mut()) {
-          app.add_message(Message::Controller(ControllerMessage::GetNews(1)));
+          app.add_message(Message::View(ViewMessage::ShowNews(store_ref.news.clone())));
         }
       }) as Box<FnMut(JsValue)>);
 
