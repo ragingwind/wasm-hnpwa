@@ -277,29 +277,29 @@ impl Element {
     }
   }
 
-  // pub fn dataset_set(&mut self, key: &str, value: &str) {
-  //   if let Some(el) = self.el.take() {
-  //     {
-  //       if let Some(el) = wasm_bindgen::JsCast::dyn_ref::<web_sys::HtmlElement>(&el) {
-  //         el.dataset().set(key, value).unwrap();
-  //       }
-  //     }
-  //     self.el = Some(el);
-  //   }
-  // }
+  pub fn dataset_set(&mut self, key: &str, value: &str) {
+    if let Some(el) = self.el.take() {
+      {
+        if let Some(el) = wasm_bindgen::JsCast::dyn_ref::<web_sys::HtmlElement>(&el) {
+          el.dataset().set(key, value).unwrap();
+        }
+      }
+      self.el = Some(el);
+    }
+  }
 
-  // pub fn dataset_get(&mut self, key: &str) -> String {
-  //   let mut text = String::new();
-  //   if let Some(el) = self.el.take() {
-  //     {
-  //       if let Some(el) = wasm_bindgen::JsCast::dyn_ref::<web_sys::HtmlElement>(&el) {
-  //         text = el.dataset().get(key);
-  //       }
-  //     }
-  //     self.el = Some(el);
-  //   }
-  //   text
-  // }
+  pub fn dataset_get(&mut self, key: &str) -> String {
+    let mut text = String::new();
+    if let Some(el) = self.el.take() {
+      {
+        if let Some(el) = wasm_bindgen::JsCast::dyn_ref::<web_sys::HtmlElement>(&el) {
+          text = el.dataset().get(key);
+        }
+      }
+      self.el = Some(el);
+    }
+    text
+  }
 
   // /// Sets the value for the element in `self.el` (The element must be an input)
   // pub fn set_value(&mut self, value: &str) {

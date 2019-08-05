@@ -32,6 +32,20 @@ impl Endpoint {
       Endpoint::Jobs => format!("https://api.hnpwa.com/v0/jobs/{}.json", page),
     }
   }
+
+  pub fn get_url(item_type: &str, page: u32) -> String {
+    if item_type == "news" {
+      format!("https://api.hnpwa.com/v0/news/{}.json", page)
+    } else if item_type == "newest" {
+      format!("https://api.hnpwa.com/v0/newest/{}.json", page)
+    } else if item_type == "ask" {
+      format!("https://api.hnpwa.com/v0/ask/{}.json", page)
+    } else if item_type == "show" {
+      format!("https://api.hnpwa.com/v0/show/{}.json", page)
+    } else {
+      format!("https://api.hnpwa.com/v0/jobs/{}.json", page)
+    }
+  }
 }
 
 #[derive(Clone)]

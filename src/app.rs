@@ -48,7 +48,6 @@ impl App {
   }
 
   pub fn add_message(&self, message: Message) {
-    log("add message");
     let running = self.running.try_borrow_mut().unwrap().clone();
 
     {
@@ -65,7 +64,6 @@ impl App {
 
   /// Start the event loop, taking messages from the stack to run
   fn run(&self) {
-    log("run");
     {
       let events = self.events.try_borrow().unwrap();
       let events_len = events.len().clone();
@@ -78,7 +76,6 @@ impl App {
       }
     }
 
-    log("next message");
     self.next_message();
   }
 
@@ -88,7 +85,6 @@ impl App {
 
     let event = {
       if let Ok(mut events) = self.events.try_borrow_mut() {
-        console_log!("event pop");
         Some(events.pop())
       } else {
         None

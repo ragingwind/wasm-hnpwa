@@ -28,8 +28,7 @@ pub fn app() {
     view.init();
     app.set_view(view);
     app.set_controller(controller);
-
-    app.add_message(Message::Controller(ControllerMessage::GetNews(1)));
+    app.add_message(Message::Controller(ControllerMessage::GetNews("news", 1)));
   }
 }
 
