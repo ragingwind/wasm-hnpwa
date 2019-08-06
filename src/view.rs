@@ -37,12 +37,12 @@ impl View {
     // self.bind_nav_item("#ask");
     // self.bind_nav_item("#show");
     // self.bind_nav_item("#jobs");
-    self.bind_more("news", 2);
+    // self.bind_more("news", 2);
   }
 
   fn bind_more(&mut self, item_name: &'static str, page: u32) {
     if let Some(mut more) = Element::qs("#more") {
-      more.set_href(&format!("/#{}&{}", item_name, page));
+      more.set_href(&format!("#/{}&{}", item_name, page));
     }
   }
 
@@ -72,7 +72,7 @@ impl View {
   }
 
   pub fn show_news(&mut self, news: &Vec<News>, item_name: &'static str, page: u32) {
-    self.bind_more(item_name, page);
+    self.bind_more(item_name, if page < 10 { page + 1 } else { page });
 
     if let Some(mut section) = Element::qs("section") {
       if let Some(ul) = section.qs_from("ul") {
