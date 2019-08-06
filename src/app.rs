@@ -1,6 +1,5 @@
 use crate::controller::{Controller, ControllerMessage};
 // use crate::fetch::*;
-use crate::console::*;
 use crate::view::{View, ViewMessage};
 use std::cell::RefCell;
 use std::rc::Rc;

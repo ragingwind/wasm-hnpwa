@@ -14,16 +14,23 @@ lazy_static! {
 
 pub struct Controller {
   app: RefCell<Rc<App>>,
+  page: u32,
 }
 
 pub enum ControllerMessage {
   GetNews(&'static str, u32),
+  ChangePage(&'static str),
+}
+
+fn string_to_static_str(s: String) -> &'static str {
+  Box::leak(s.into_boxed_str())
 }
 
 impl Controller {
   pub fn new(app: Rc<App>) -> Controller {
     Controller {
       app: RefCell::new(app),
+      page: 1,
     }
   }
 
@@ -31,7 +38,14 @@ impl Controller {
     use self::ControllerMessage::*;
     match method_name {
       GetNews(item_name, page) => self.get_news(item_name, page),
+      ChangePage(hash) => self.change_page(hash),
     }
+  }
+
+  fn change_page(&self, hash: &'static str) {
+    let hash = hash.trim_start_matches("#/");
+    let v: Vec<&str> = string_to_static_str(hash.to_string()).split("&").collect();
+    self.get_news(v[0], v[1].parse::<u32>().unwrap());
   }
 
   pub fn get_news(&self, item_name: &'static str, page: u32) {
@@ -41,7 +55,11 @@ impl Controller {
         let data: Vec<News> = json.into_serde().unwrap();
 
         if let Ok(app) = &(app.try_borrow_mut()) {
-          app.add_message(Message::View(ViewMessage::ShowNews(data.clone())));
+          app.add_message(Message::View(ViewMessage::ShowNews(
+            data.clone(),
+            item_name,
+            page,
+          )));
         }
       }) as Box<FnMut(JsValue)>);
 

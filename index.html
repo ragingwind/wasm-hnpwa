@@ -22,12 +22,17 @@
 
     nav h1 {
       padding: 0;
+      margin: 0;
+    }
+
+    nav h1 img {
+      height: 48px;
     }
 
     nav ul {
       width: 100vw;
       margin: 0;
-      background-color: rgba(0, 0, 0, 0.9);
+      background-color: rgba(0, 0, 0, 1);
       padding: 12px 0;
     }
 
@@ -35,8 +40,10 @@
       display: inline;
       list-style: none;
       color: rgb(255, 255, 255);
-      font-size: 1.5em;
+      font-size: 1.2em;
+      line-height: 1.5em;
       margin: 0 20px;
+      cursor: pointer;
     }
 
     section {
@@ -45,8 +52,8 @@
 
     section ul {
       width: 100vw;
-      margin: 40px 0;
-      padding: 16px 0 0;
+      padding: 3.5em 0 1em 0;
+      margin: 0
     }
 
     section ul li {
@@ -68,22 +75,37 @@
       font-size: 1.4em;
     }
 
-    footer {
-      font-size: 1.4em;
+    footer a {
+      font-size: 1em;
     }
   </style>
+  <script>
+    function resetHref() {
+      location.hash = '';
+    }
+  </script>
 </head>
 
 <body>
   <header>
     <nav>
-      <h1 id="logo">Logo</h1>
+      <h1 id="logo"><img src="static/logo.png" /></h1>
       <ul>
-        <li id="news">NEWS</li>
-        <li id="newest">NEWEST</li>
-        <li id="ask">ASK</li>
-        <li id="show">SHOW</li>
-        <li id="jobs">JOBS</li>
+        <a href="#/news&1">
+          <li id="news">NEWS</li>
+        </a>
+        <a href="#/newest&1">
+          <li id="newest">NEWEST</li>
+        </a>
+        <a href="#/ask&1">
+          <li id="ask">ASK</li>
+        </a>
+        <a href="#/show&1">
+          <li id="show">SHOW</li>
+        </a>
+        <a href="#/jobs&1">
+          <li id="jobs">JOBS</li>
+        </a>
       </ul>
     </nav>
   </header>
@@ -92,7 +114,7 @@
     </ul>
   </section>
   <footer>
-    <a href="?page=2">More...</a>
+    <a id="more" href="">More...</a>
   </footer>
 
   <script type="module">

@@ -3,7 +3,7 @@ use wasm_bindgen::JsCast;
 use web_sys::EventTarget;
 
 pub struct Element {
-  el: Option<web_sys::Element>,
+  pub el: Option<web_sys::Element>,
 }
 
 impl From<web_sys::Element> for Element {
@@ -69,6 +69,31 @@ impl Element {
       cb.forget();
       if let Ok(el) = el_et.dyn_into::<web_sys::Element>() {
         self.el = Some(el);
+      }
+    }
+  }
+
+  pub fn remove_event_listener<T>(&mut self, event_name: &str, handler: T)
+  where
+    T: 'static + FnMut(web_sys::Event),
+  {
+    let cb = Closure::wrap(Box::new(handler) as Box<dyn FnMut(_)>);
+    if let Some(el) = self.el.take() {
+      let el_et: EventTarget = el.into();
+      el_et
+        .remove_event_listener_with_callback(event_name, cb.as_ref().unchecked_ref())
+        .unwrap();
+      cb.forget();
+      if let Ok(el) = el_et.dyn_into::<web_sys::Element>() {
+        self.el = Some(el);
+      }
+    }
+  }
+
+  pub fn set_href(&mut self, href: &str) {
+    if let Some(el) = self.el.as_ref() {
+      if let Some(node) = &el.dyn_ref::<web_sys::HtmlAnchorElement>() {
+        node.set_href(href);
       }
     }
   }

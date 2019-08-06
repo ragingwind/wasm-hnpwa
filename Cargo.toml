@@ -34,6 +34,7 @@ features = [
   'HtmlBodyElement',
   'HtmlElement',
   'HtmlInputElement',
+  'HtmlAnchorElement',
   'KeyboardEvent',
   'Location',
   'Node',

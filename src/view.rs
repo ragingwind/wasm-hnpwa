@@ -7,9 +7,11 @@ use crate::store::News;
 use crate::view::element::Element;
 use std::cell::RefCell;
 use std::rc::Rc;
+use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
 
 pub enum ViewMessage {
-  ShowNews(Vec<News>),
+  ShowNews(Vec<News>, &'static str, u32),
 }
 
 fn remove_first(s: &str) -> &str {
@@ -19,29 +21,32 @@ fn remove_first(s: &str) -> &str {
 }
 
 pub struct View {
-  body: Element,
   app: RefCell<Rc<App>>,
 }
 
 impl View {
   pub fn new(app: Rc<App>) -> View {
-    let body = Element::qs("body").unwrap();
-
     View {
-      body,
       app: RefCell::new(app),
     }
   }
 
   pub fn init(&mut self) {
-    self.bind_nav_item("#news");
-    self.bind_nav_item("#newest");
-    self.bind_nav_item("#ask");
-    self.bind_nav_item("#show");
-    self.bind_nav_item("#jobs");
+    // self.bind_nav_item("#news");
+    // self.bind_nav_item("#new");
+    // self.bind_nav_item("#ask");
+    // self.bind_nav_item("#show");
+    // self.bind_nav_item("#jobs");
+    self.bind_more("news", 2);
   }
 
-  pub fn bind_nav_item(&mut self, item_name: &'static str) {
+  fn bind_more(&mut self, item_name: &'static str, page: u32) {
+    if let Some(mut more) = Element::qs("#more") {
+      more.set_href(&format!("/#{}&{}", item_name, page));
+    }
+  }
+
+  fn bind_nav_item(&mut self, item_name: &'static str) {
     let app = self.app.clone();
     let mut nav = Element::qs("nav").unwrap();
     nav.delegate(
@@ -62,11 +67,13 @@ impl View {
   pub fn call(&mut self, method_name: ViewMessage) {
     use self::ViewMessage::*;
     match method_name {
-      ShowNews(news) => View::show_news(&news),
+      ShowNews(news, item_name, page) => self.show_news(&news, item_name, page),
     }
   }
 
-  pub fn show_news(news: &Vec<News>) {
+  pub fn show_news(&mut self, news: &Vec<News>, item_name: &'static str, page: u32) {
+    self.bind_more(item_name, page);
+
     if let Some(mut section) = Element::qs("section") {
       if let Some(ul) = section.qs_from("ul") {
         section.remove_child(ul);
