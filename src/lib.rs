@@ -40,6 +40,41 @@ pub fn app() {
   {
     let window = web_sys::window().unwrap();
     let document = window.document().unwrap();
+    let location = document.location().unwrap();
+
+    let href = location.href().unwrap();
+    let mut domain: Vec<&str> = href.split("/").collect();
+    if let Some(hash) = domain.pop() {
+      let hashes: Vec<&str> = hash.split("&").collect();
+      let hash = match hashes[0] {
+        "news" => "news",
+        "newest" => "newest",
+        "ask" => "ask",
+        "show" => "show",
+        "jobs" => "jobs",
+        _ => "news",
+      };
+
+      let mut page = 1;
+      if hashes.len() > 1 {
+        let page_num = hashes[1].parse::<u32>().unwrap();
+        page = match page_num {
+          1...10 => page_num,
+          _ => 1,
+        }
+      }
+
+      let hash = format!("#/{}&{}", hash, page);
+
+      app.add_message(Message::Controller(ControllerMessage::ChangePage(
+        string_to_static_str(hash),
+      )));
+    }
+  }
+
+  {
+    let window = web_sys::window().unwrap();
+    let document = window.document().unwrap();
 
     let set_page = Closure::wrap(Box::new(move || {
       if let Some(location) = document.location() {
@@ -57,17 +92,6 @@ pub fn app() {
       .unwrap();
 
     set_page.forget();
-  }
-
-  {
-    let window = web_sys::window().unwrap();
-    let document = window.document().unwrap();
-    let location = document.location().unwrap();
-
-    match location.set_href("#/news&1") {
-      Err(e) => console_log!("{:?}", e),
-      _ => (),
-    }
   }
 }
 
