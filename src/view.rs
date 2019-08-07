@@ -85,8 +85,24 @@ impl View {
         let mut items = String::new();
         for item in news.iter() {
           items.push_str(&format!(
-            "<li><div><a href={:?} target='_blank'>{:?}<a></div></li>",
-            item.url, item.title
+            "<li class='item'>
+              <div class='points'>{:?}</div>
+              <div class='content'>
+                <div class='outlink'><a href={} target='_blank'>{:?}</a></div>
+                <div class='info'> by {:?} | {} comments</div>
+              </div>
+            </li>",
+            match item.points {
+              Some(points) => points,
+              None => 0,
+            },
+            item.url,
+            item.title,
+            match &item.user {
+              Some(user) => user,
+              None => "John Doe",
+            },
+            item.comments_count
           ));
         }
         ul.set_inner_html(items.to_string());

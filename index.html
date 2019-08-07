@@ -4,86 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
   <title>HNPWA with WASM</title>
-  <style>
-    html,
-    body {
-      padding: 0;
-      margin: 0;
-      font-size: 12px;
-    }
-
-    nav {
-      position: fixed;
-      display: flex;
-      top: 0;
-      height: 48px;
-    }
-
-    nav h1 {
-      padding: 0;
-      margin: 0;
-    }
-
-    nav h1 img {
-      height: 48px;
-    }
-
-    nav ul {
-      width: 100vw;
-      margin: 0;
-      background-color: rgba(0, 0, 0, 1);
-      padding: 12px 0;
-    }
-
-    nav ul li {
-      display: inline;
-      list-style: none;
-      color: rgb(255, 255, 255);
-      font-size: 1.2em;
-      line-height: 1.5em;
-      margin: 0 20px;
-      cursor: pointer;
-    }
-
-    section {
-      margin-top: 6vh;
-    }
-
-    section ul {
-      width: 100vw;
-      padding: 3.5em 0 1em 0;
-      margin: 0
-    }
-
-    section ul li {
-      display: flex;
-      list-style: none;
-      margin: 0 20px;
-    }
-
-    .like_count {
-      font-size: 1.6em;
-      width: 1.2em;
-    }
-
-    .title {
-      font-size: 1.6em;
-    }
-
-    .info {
-      font-size: 1.4em;
-    }
-
-    footer a {
-      font-size: 1em;
-    }
-  </style>
-  <script>
-    function resetHref() {
-      location.hash = '';
-    }
-  </script>
 </head>
 
 <body>
@@ -91,20 +13,11 @@
     <nav>
       <h1 id="logo"><img src="static/logo.png" /></h1>
       <ul>
-        <a href="#/news&1">
-          <li id="news">NEWS</li>
-        </a>
-        <a href="#/newest&1">
-          <li id="newest">NEWEST</li>
-        </a>
-        <a href="#/ask&1">
-          <li id="ask">ASK</li>
-        </a>
-        <a href="#/show&1">
-          <li id="show">SHOW</li>
-        </a>
-        <a href="#/jobs&1">
-          <li id="jobs">JOBS</li>
+        <li id="news"><a href="#/news&1">NEWS</a></li>
+        <li id="newest"><a href="#/newest&1">NEWEST</a></li>
+        <li id="ask"><a href="#/ask&1">ASK</a></li>
+        <li id="show"><a href="#/show&1">SHOW</a></li>
+        <li id="jobs"><a href="#/jobs&1">JOBS</a></li>
         </a>
       </ul>
     </nav>
