@@ -52,6 +52,7 @@ pub fn app() {
         "ask" => "ask",
         "show" => "show",
         "jobs" => "jobs",
+        "detail" => "detail",
         _ => "news",
       };
 

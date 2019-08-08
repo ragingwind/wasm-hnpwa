@@ -45,10 +45,40 @@ impl Controller {
   fn change_page(&self, hash: &'static str) {
     let hash = hash.trim_start_matches("#/");
     let v: Vec<&str> = string_to_static_str(hash.to_string()).split("&").collect();
-    self.get_news(v[0], v[1].parse::<u32>().unwrap());
+    let pathname = v[0];
+    let index = v[1].parse::<u32>().unwrap();
+
+    console_log!("{} {}", pathname, index);
+    match pathname {
+      "news" | "newest" | "ask" | "show" | "jobs" => self.get_news(pathname, index),
+      "detail" => self.get_detail(pathname, index),
+      _ => self.get_news("news", 1),
+    }
   }
 
-  pub fn get_news(&self, item_name: &'static str, page: u32) {
+  pub fn get_detail(&self, pathname: &'static str, index: u32) {
+    let app = self.app.clone();
+    let fetch = move || {
+      let done = Closure::wrap(Box::new(move |json: JsValue| {
+        let item: Item = json.into_serde().unwrap();
+        console_log!("data: {:?}", item);
+
+        if let Ok(app) = &(app.try_borrow_mut()) {
+          app.add_message(Message::View(ViewMessage::ShowDetail(
+            item, pathname, index,
+          )));
+        }
+      }) as Box<FnMut(JsValue)>);
+
+      let endpoint = format!("https://api.hnpwa.com/v0/item/{}.json", index);
+      Fetch::get_json(&endpoint).then(&done);
+      done.forget();
+    };
+
+    fetch();
+  }
+
+  pub fn get_news(&self, pathname: &'static str, index: u32) {
     let app = self.app.clone();
     let fetch = move || {
       let done = Closure::wrap(Box::new(move |json: JsValue| {
@@ -57,13 +87,13 @@ impl Controller {
         if let Ok(app) = &(app.try_borrow_mut()) {
           app.add_message(Message::View(ViewMessage::ShowNews(
             data.clone(),
-            item_name,
-            page,
+            pathname,
+            index,
           )));
         }
       }) as Box<FnMut(JsValue)>);
 
-      let endpoint = Endpoint::get_url(item_name, page);
+      let endpoint = Endpoint::get_url(pathname, index);
       Fetch::get_json(&endpoint).then(&done);
       done.forget();
     };

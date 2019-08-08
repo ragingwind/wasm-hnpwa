@@ -14,6 +14,24 @@ pub struct News {
   pub domain: Option<String>,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Item {
+  pub id: u64,
+  pub title: Option<String>,
+  pub points: Option<u64>,
+  pub user: Option<String>,
+  pub time: u64,
+  pub time_ago: String,
+  pub content: Option<String>,
+  pub deleted: Option<bool>,
+  pub dead: Option<bool>,
+  pub r#type: String,
+  pub url: Option<String>,
+  pub domain: Option<String>,
+  pub comments: Vec<Item>,
+  pub level: Option<u64>,
+  pub comments_count: u64,
+}
 pub enum Endpoint {
   News,
   Newest,
@@ -34,17 +52,7 @@ impl Endpoint {
   }
 
   pub fn get_url(item_type: &str, page: u32) -> String {
-    if item_type == "news" {
-      format!("https://api.hnpwa.com/v0/news/{}.json", page)
-    } else if item_type == "newest" {
-      format!("https://api.hnpwa.com/v0/newest/{}.json", page)
-    } else if item_type == "ask" {
-      format!("https://api.hnpwa.com/v0/ask/{}.json", page)
-    } else if item_type == "show" {
-      format!("https://api.hnpwa.com/v0/show/{}.json", page)
-    } else {
-      format!("https://api.hnpwa.com/v0/jobs/{}.json", page)
-    }
+    format!("https://api.hnpwa.com/v0/{}/{}.json", item_type, page)
   }
 }
 

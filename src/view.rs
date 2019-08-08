@@ -3,7 +3,7 @@ pub mod element;
 use super::console::*;
 use crate::app::{App, Message};
 use crate::controller::ControllerMessage;
-use crate::store::News;
+use crate::store::*;
 use crate::view::element::Element;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -12,6 +12,7 @@ use wasm_bindgen::JsCast;
 
 pub enum ViewMessage {
   ShowNews(Vec<News>, &'static str, u32),
+  ShowDetail(Item, &'static str, u32),
 }
 
 fn remove_first(s: &str) -> &str {
@@ -40,22 +41,22 @@ impl View {
     // self.bind_more("news", 2);
   }
 
-  fn bind_more(&mut self, item_name: &'static str, page: u32) {
+  fn bind_more(&mut self, pathname: &'static str, index: u32) {
     if let Some(mut more) = Element::qs("#more") {
-      more.set_href(&format!("#/{}&{}", item_name, page));
+      more.set_href(&format!("#/{}&{}", pathname, index));
     }
   }
 
-  fn bind_nav_item(&mut self, item_name: &'static str) {
+  fn bind_nav_item(&mut self, pathname: &'static str) {
     let app = self.app.clone();
     let mut nav = Element::qs("nav").unwrap();
     nav.delegate(
-      item_name,
+      pathname,
       "click",
       move |_| {
         if let Ok(app) = &(app.try_borrow_mut()) {
           app.add_message(Message::Controller(ControllerMessage::GetNews(
-            remove_first(item_name),
+            remove_first(pathname),
             1,
           )));
         }
@@ -67,12 +68,13 @@ impl View {
   pub fn call(&mut self, method_name: ViewMessage) {
     use self::ViewMessage::*;
     match method_name {
-      ShowNews(news, item_name, page) => self.show_news(&news, item_name, page),
+      ShowNews(news, pathname, index) => self.show_news(&news, pathname, index),
+      ShowDetail(item, pathname, index) => self.show_detail(&item, pathname, index),
     }
   }
 
-  pub fn show_news(&mut self, news: &Vec<News>, item_name: &'static str, page: u32) {
-    self.bind_more(item_name, if page < 10 { page + 1 } else { page });
+  pub fn show_news(&mut self, news: &Vec<News>, pathname: &'static str, index: u32) {
+    self.bind_more(pathname, if index < 10 { index + 1 } else { index });
 
     if let Some(mut section) = Element::qs("section") {
       if let Some(ul) = section.qs_from("ul") {
@@ -88,7 +90,7 @@ impl View {
             "<li class='item'>
               <div class='points'>{:?}</div>
               <div class='content'>
-                <div class='outlink'><a href={} target='_blank'>{:?}</a></div>
+                <div class='detail'><a href='#/detail&{}'>{:?}</a></div>
                 <div class='info'> by {:?} | {} comments</div>
               </div>
             </li>",
@@ -96,7 +98,7 @@ impl View {
               Some(points) => points,
               None => 0,
             },
-            item.url,
+            item.id,
             item.title,
             match &item.user {
               Some(user) => user,
@@ -106,6 +108,46 @@ impl View {
           ));
         }
         ul.set_inner_html(items.to_string());
+      }
+    }
+  }
+
+  pub fn show_detail(&mut self, item: &Item, pathname: &'static str, index: u32) {
+    self.bind_more(pathname, if index < 10 { index + 1 } else { index });
+
+    if let Some(mut section) = Element::qs("section") {
+      if let Some(ul) = section.qs_from("ul") {
+        section.remove_child(ul);
+      }
+
+      if let Some(mut div) = Element::create_element("div") {
+        section.append_child(&mut div);
+
+        let html: String = format!(
+          "<div class='item'>
+              <div class='title'>{}</div>
+              <div class='meta'>
+                <div class='detail'>by {} | {} comments</div>
+              </div>
+              <div class='content'>
+                {}
+              </div>
+            </div>",
+          match &item.title {
+            Some(title) => title.as_str(),
+            None => "No title",
+          },
+          match &item.user {
+            Some(user) => user,
+            None => "John Doe",
+          },
+          item.comments_count,
+          match &item.content {
+            Some(content) => content,
+            None => "",
+          }
+        );
+        div.set_inner_html(html);
       }
     }
   }
