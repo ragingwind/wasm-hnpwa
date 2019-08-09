@@ -76,38 +76,42 @@ impl View {
   pub fn show_news(&mut self, news: &Vec<News>, pathname: &'static str, index: u32) {
     self.bind_more(pathname, if index < 10 { index + 1 } else { index });
 
-    if let Some(mut section) = Element::qs("section") {
-      if let Some(ul) = section.qs_from("ul") {
-        section.remove_child(ul);
+    if let Some(mut section) = Element::qs("#content") {
+      if let Some(div) = section.qs_from("div") {
+        section.remove_child(div);
       }
 
-      if let Some(mut ul) = Element::create_element("ul") {
-        section.append_child(&mut ul);
+      if let Some(mut div) = Element::create_element("div") {
+        section.append_child(&mut div);
 
-        let mut items = String::new();
-        for item in news.iter() {
-          items.push_str(&format!(
-            "<li class='item'>
-              <div class='points'>{:?}</div>
-              <div class='content'>
-                <div class='detail'><a href='#/detail&{}'>{:?}</a></div>
-                <div class='info'> by {:?} | {} comments</div>
-              </div>
-            </li>",
-            match item.points {
-              Some(points) => points,
-              None => 0,
-            },
-            item.id,
-            item.title,
-            match &item.user {
-              Some(user) => user,
-              None => "John Doe",
-            },
-            item.comments_count
-          ));
+        if let Some(mut ul) = Element::create_element("ul") {
+          div.append_child(&mut ul);
+
+          let mut items = String::new();
+          for item in news.iter() {
+            items.push_str(&format!(
+              "<li class='item'>
+                  <div class='points'>{:?}</div>
+                  <div class='content'>
+                    <div class='detail'><a href='#/detail&{}'>{:?}</a></div>
+                    <div class='info'> by {:?} | {} comments</div>
+                  </div>
+                </li>",
+              match item.points {
+                Some(points) => points,
+                None => 0,
+              },
+              item.id,
+              item.title,
+              match &item.user {
+                Some(user) => user,
+                None => "John Doe",
+              },
+              item.comments_count
+            ));
+          }
+          ul.set_inner_html(items.to_string());
         }
-        ul.set_inner_html(items.to_string());
       }
     }
   }
@@ -115,39 +119,43 @@ impl View {
   pub fn show_detail(&mut self, item: &Item, pathname: &'static str, index: u32) {
     self.bind_more(pathname, if index < 10 { index + 1 } else { index });
 
-    if let Some(mut section) = Element::qs("section") {
-      if let Some(ul) = section.qs_from("ul") {
-        section.remove_child(ul);
+    if let Some(mut section) = Element::qs("#content") {
+      if let Some(div) = section.qs_from("div") {
+        section.remove_child(div);
       }
 
       if let Some(mut div) = Element::create_element("div") {
         section.append_child(&mut div);
 
-        let html: String = format!(
-          "<div class='item'>
-              <div class='title'>{}</div>
-              <div class='meta'>
-                <div class='detail'>by {} | {} comments</div>
-              </div>
-              <div class='content'>
-                {}
-              </div>
-            </div>",
-          match &item.title {
-            Some(title) => title.as_str(),
-            None => "No title",
-          },
-          match &item.user {
-            Some(user) => user,
-            None => "John Doe",
-          },
-          item.comments_count,
-          match &item.content {
-            Some(content) => content,
-            None => "",
-          }
-        );
-        div.set_inner_html(html);
+        if let Some(mut content) = Element::create_element("div") {
+          div.append_child(&mut content);
+
+          let html: String = format!(
+            "<div class='item'>
+                <div class='title'>{}</div>
+                <div class='meta'>
+                  <div class='detail'>by {} | {} comments</div>
+                </div>
+                <div class='content'>
+                  {}
+                </div>
+              </div>",
+            match &item.title {
+              Some(title) => title.as_str(),
+              None => "No title",
+            },
+            match &item.user {
+              Some(user) => user,
+              None => "John Doe",
+            },
+            item.comments_count,
+            match &item.content {
+              Some(content) => content,
+              None => "",
+            }
+          );
+          div.set_inner_html(html);
+        }
       }
     }
   }
