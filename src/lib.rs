@@ -4,6 +4,7 @@ use crate::app::{App, Message};
 use crate::console::*;
 use crate::controller::Controller;
 use crate::controller::ControllerMessage;
+use crate::types::*;
 use crate::view::View;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -14,15 +15,8 @@ mod app;
 mod controller;
 mod event;
 mod fetch;
-mod store;
+mod types;
 mod view;
-
-#[macro_use]
-extern crate lazy_static;
-
-fn string_to_static_str(s: String) -> &'static str {
-  Box::leak(s.into_boxed_str())
-}
 
 #[wasm_bindgen]
 pub fn app() {
@@ -31,10 +25,8 @@ pub fn app() {
   let controller = Controller::new(app.clone());
 
   {
-    view.init();
     app.set_view(view);
     app.set_controller(controller);
-    // app.add_message(Message::Controller(ControllerMessage::GetNews("news", 1)));
   }
 
   {
@@ -54,24 +46,13 @@ pub fn app() {
         "jobs" => "jobs",
         "detail" => "detail",
         "user" => "user",
+        "comment" => "comment",
         _ => "news",
       };
 
-      // let mut page = 1;
-      // if hashes.len() > 1 {
-      //   let page_num = hashes[1].parse::<u32>().unwrap();
-      //   page = match page_num {
-      //     1...10 => page_num,
-      //     _ => 1,
-      //   }
-      // }
-
       let hash = format!("#/{}&{}", hash, hashes[1]);
-
-      console_log!("hash: {}", hash);
-
       app.add_message(Message::Controller(ControllerMessage::ChangePage(
-        string_to_static_str(hash),
+        to_static_str(hash),
       )));
     }
   }
@@ -85,7 +66,7 @@ pub fn app() {
         if let Ok(hash) = location.hash() {
           console_log!("hash change {}", hash);
           app.add_message(Message::Controller(ControllerMessage::ChangePage(
-            string_to_static_str(hash),
+            to_static_str(hash),
           )));
         }
       }

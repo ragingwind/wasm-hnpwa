@@ -3,7 +3,7 @@ pub mod element;
 use super::console::*;
 use crate::app::{App, Message};
 use crate::controller::ControllerMessage;
-use crate::store::*;
+use crate::types::*;
 use crate::view::element::Element;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -13,6 +13,7 @@ use wasm_bindgen::JsCast;
 pub enum ViewMessage {
   ShowNews(Vec<News>, &'static str, u32),
   ShowUser(User, &'static str, &'static str),
+  ShowComment(Item, &'static str, u32),
 }
 
 fn remove_first(s: &str) -> &str {
@@ -32,15 +33,6 @@ impl View {
     }
   }
 
-  pub fn init(&mut self) {
-    // self.bind_nav_item("#news");
-    // self.bind_nav_item("#new");
-    // self.bind_nav_item("#ask");
-    // self.bind_nav_item("#show");
-    // self.bind_nav_item("#jobs");
-    // self.bind_more("news", 2);
-  }
-
   fn bind_more(&mut self, pathname: &'static str, index: u32) {
     if let Some(mut more) = Element::qs("#more") {
       if let Some(a) = more.qs_from("a") {
@@ -52,29 +44,56 @@ impl View {
     }
   }
 
-  fn bind_nav_item(&mut self, pathname: &'static str) {
-    let app = self.app.clone();
-    let mut nav = Element::qs("nav").unwrap();
-    nav.delegate(
-      pathname,
-      "click",
-      move |_| {
-        if let Ok(app) = &(app.try_borrow_mut()) {
-          app.add_message(Message::Controller(ControllerMessage::GetNews(
-            remove_first(pathname),
-            1,
-          )));
-        }
-      },
-      false,
-    );
-  }
-
   pub fn call(&mut self, method_name: ViewMessage) {
     use self::ViewMessage::*;
     match method_name {
       ShowNews(news, pathname, index) => self.show_news(&news, pathname, index),
       ShowUser(user, pathname, uid) => self.show_user(&user, pathname, uid),
+      ShowComment(item, pathname, index) => self.show_comment(&item, pathname, index),
+    }
+  }
+
+  pub fn show_comment(&mut self, item: &Item, pathname: &'static str, index: u32) {
+    if let Some(mut more) = Element::qs("#more") {
+      if let Some(a) = more.qs_from("a") {
+        more.remove_child(a);
+      }
+    }
+
+    if let Some(mut section) = Element::qs("#content") {
+      if let Some(div) = section.qs_from("div") {
+        section.remove_child(div);
+      }
+
+      if let Some(mut div) = Element::create_element("div") {
+        section.append_child(&mut div);
+
+        if let Some(mut ul) = Element::create_element("ul") {
+          div.append_child(&mut ul);
+
+          let mut comments = String::new();
+
+          for comment in item.comments.iter() {
+            let user = match &comment.user {
+              Some(user) => user,
+              None => "John Doe",
+            };
+
+            comments.push_str(&format!(
+              "<li class='comment'>
+                <div>
+                  <sub class='user'>{}</sub>
+                  <sub class='time_ago'>{}</sub>
+                </div>
+                <div>
+                  <div class='content'>{}</div>
+                </li>",
+              user, comment.time_ago, comment.content
+            ));
+          }
+          ul.set_inner_html(comments.to_string());
+        }
+      }
     }
   }
 
@@ -115,10 +134,10 @@ impl View {
                       <span><a href='{}' target='_blank'>{}</a></span>
                       <span class='domain'>{}</span>
                     </div>
-                    <div class='info'> by <a href='#/user&{}'>{}</a> | {} comments</div>
+                    <div class='info'> by <a href='#/user&{}'>{}</a> | <a href='#/comment&{}'>{} comments</a></div>
                   </div>
                 </li>",
-              points, item.url, item.title, domain, user, user, item.comments_count
+              points, item.url, item.title, domain, user, user, item.id, item.comments_count
             ));
           }
           ul.set_inner_html(items.to_string());
@@ -128,7 +147,6 @@ impl View {
   }
 
   pub fn show_user(&mut self, user: &User, pathname: &'static str, uid: &'static str) {
-    console_log!("{}, {}", pathname, uid);
     if let Some(mut more) = Element::qs("#more") {
       if let Some(a) = more.qs_from("a") {
         more.remove_child(a);

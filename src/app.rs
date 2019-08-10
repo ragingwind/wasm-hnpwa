@@ -1,9 +1,7 @@
 use crate::controller::{Controller, ControllerMessage};
-// use crate::fetch::*;
 use crate::view::{View, ViewMessage};
 use std::cell::RefCell;
 use std::rc::Rc;
-// use wasm_bindgen::prelude::*;
 
 pub enum Message {
   Controller(ControllerMessage),
@@ -61,7 +59,6 @@ impl App {
     }
   }
 
-  /// Start the event loop, taking messages from the stack to run
   fn run(&self) {
     {
       let events = self.events.try_borrow().unwrap();
@@ -79,7 +76,6 @@ impl App {
   }
 
   fn next_message(&self) {
-    // let events = self.events.try_borrow().unwrap();
     let mut running = self.running.try_borrow_mut().unwrap().clone();
 
     let event = {

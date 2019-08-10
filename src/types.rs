@@ -65,27 +65,6 @@ impl Endpoint {
   }
 }
 
-#[derive(Clone)]
-pub struct Store {
-  pub news: Vec<News>,
-  numbers: u32,
-}
-
-impl Store {
-  pub fn new() -> Store {
-    Store {
-      news: Vec::new(),
-      numbers: 0,
-    }
-  }
-
-  pub fn get_endpoints(&self, page: u32) -> Vec<String> {
-    vec![
-      Endpoint::News.as_str(page).into(),
-      Endpoint::Newest.as_str(page).into(),
-      Endpoint::Ask.as_str(page).into(),
-      Endpoint::Show.as_str(page).into(),
-      Endpoint::Jobs.as_str(page).into(),
-    ]
-  }
+pub fn to_static_str(s: String) -> &'static str {
+  Box::leak(s.into_boxed_str())
 }
