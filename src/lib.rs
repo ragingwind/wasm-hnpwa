@@ -19,7 +19,6 @@ mod view;
 
 #[wasm_bindgen]
 pub fn app() {
-  console_log!("appppp");
   let app = Rc::new(App::new());
   let view = View::new();
   let controller = Controller::new(app.clone());

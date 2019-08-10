@@ -4,14 +4,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="/static/index.css">
+  <link rel="manifest" href="/static/manifest.json">
   <title>HNPWA with WASM</title>
 </head>
 
 <body>
   <header>
     <nav>
-      <h1 id="logo"><img src="static/logo.png" /></h1>
+      <h1 id="logo"><img src="/static/logo.png" /></h1>
       <ul>
         <li id="news"><a href="#/news&1">NEWS</a></li>
         <li id="newest"><a href="#/newest&1">NEWEST</a></li>
@@ -26,26 +27,11 @@
   </section>
   <footer id="more">
   </footer>
-
-  <script type="module">
-    import boot from './pkg/wasm_hnpwa.js';
-
-    document.addEventListener('app', e => {
-      console.log('event', e);
-    });
-
-    async function start() {
-      const app = await boot();
-      try {
-        await app.run();
-      } catch (e) {
-        console.log(e);
-      }
-    }
-    document.addEventListener("DOMContentLoaded", () => {
-      start();
-    })
+  <script>
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(reg => console.log('SW registered!', reg))
+      .catch(err => console.log('SW registration failed', err));
   </script>
 </body>
 
-</htmlrun
+</html>

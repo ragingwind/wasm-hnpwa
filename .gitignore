@@ -2,3 +2,6 @@
 **/*.rs.bk
 Cargo.lock
 /pkg
+node_modules
+yarn.lock
+dist

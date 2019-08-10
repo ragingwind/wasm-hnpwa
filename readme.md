@@ -5,8 +5,8 @@
 # How to build and run
 
 ```sh
-wasm-pack build --target web
-npx http-server .
+$ yarn build
+$ npx http-server ./dist
 ```
 
 # License

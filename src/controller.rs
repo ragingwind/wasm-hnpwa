@@ -51,7 +51,6 @@ impl Controller {
     let fetch = move || {
       let done = Closure::wrap(Box::new(move |json: JsValue| {
         let item: Item = json.into_serde().unwrap();
-        console_log!("data: {:?}", item);
 
         if let Ok(app) = &(app.try_borrow_mut()) {
           app.add_message(Message::View(ViewMessage::ShowComment(
