@@ -84,6 +84,7 @@ section ul li {
 footer {
   padding: 0 0 2em 0;
 }
+
 footer a {
   font-size: 1em;
 }
@@ -138,4 +139,49 @@ section div.item {
 .domain {
   color: #aeaeae;
   font-size: 0.7em;
+}
+
+.user {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  padding: 0 0 1em 0;
+  margin: 0;
+  align-items: flex-start;
+  padding: 12px 0 0 30px;
+}
+
+.user h2 {
+  font-size: 3em;
+}
+
+.user .user_info {
+  font-size: 1em;
+}
+
+.comment {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  margin: 0;
+  align-items: flex-start;
+}
+
+.comment .user_info {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  padding: 1em 1em 0;
+  font-size: 1.5em;
+}
+
+.comment .user_id {
+  font-weight: 800;
+  margin-right: 15px;
+}
+
+.comment .content p {
+  font-size: 1em;
+  padding: 0 1em;
+  color: rgba(0, 0, 0, 0.5);
 }

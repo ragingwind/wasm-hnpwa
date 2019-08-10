@@ -19,6 +19,7 @@ mod view;
 
 #[wasm_bindgen]
 pub fn app() {
+  console_log!("appppp");
   let app = Rc::new(App::new());
   let view = View::new();
   let controller = Controller::new(app.clone());
@@ -35,8 +36,14 @@ pub fn app() {
 
     let href = location.href().unwrap();
     let mut domain: Vec<&str> = href.split("/").collect();
+
     if let Some(hash) = domain.pop() {
-      let hashes: Vec<&str> = hash.split("&").collect();
+      let mut hashes: Vec<&str> = hash.split("&").collect();
+
+      if hashes.len() < 2 {
+        hashes.push("1");
+      }
+
       let hash = match hashes[0] {
         "news" => "news",
         "newest" => "newest",
@@ -49,9 +56,8 @@ pub fn app() {
         _ => "news",
       };
 
-      let hash = format!("#/{}&{}", hash, hashes[1]);
       app.add_message(Message::Controller(ControllerMessage::ChangePage(
-        to_static_str(hash),
+        to_static_str(format!("#/{}&{}", hash, hashes[1])),
       )));
     }
   }

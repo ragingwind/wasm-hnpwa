@@ -1,5 +1,6 @@
 pub mod element;
 
+use super::console::*;
 use crate::types::*;
 use crate::view::element::Element;
 
@@ -64,9 +65,9 @@ impl View {
 
             comments.push_str(&format!(
               "<li class='comment'>
-                <div>
-                  <sub class='user'>{}</sub>
-                  <sub class='time_ago'>{}</sub>
+                <div class='user_info'>
+                  <div class='user_id'>{}</div>
+                  <div class='time_ago'>{}</div>
                 </div>
                 <div>
                   <div class='content'>{}</div>
@@ -82,6 +83,7 @@ impl View {
 
   pub fn show_news(&mut self, news: &Vec<News>, pathname: &'static str, index: u32) {
     self.bind_more(pathname, if index < 10 { index + 1 } else { index });
+
     if let Some(mut section) = Element::qs("#content") {
       if let Some(div) = section.qs_from("div") {
         section.remove_child(div);
@@ -147,9 +149,10 @@ impl View {
         if let Some(mut content) = Element::create_element("div") {
           div.append_child(&mut content);
           let html: String = format!(
-            "<div class='detail'>
-                <div class='title'><h2>{}</h2> <span>joined {}, and has {} karma</div>
-              </div>",
+            "<div class='user'>
+                <h2>{}</h2>
+                <div class='user_info'>joined <b>{}</b>, and has <b>{}</b> karma</div>
+            </div>",
             user.id, user.created_time, user.karma
           );
 
