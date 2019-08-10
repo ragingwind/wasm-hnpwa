@@ -13,7 +13,6 @@ use wasm_bindgen::JsCast;
 mod console;
 mod app;
 mod controller;
-mod event;
 mod fetch;
 mod types;
 mod view;
@@ -21,7 +20,7 @@ mod view;
 #[wasm_bindgen]
 pub fn app() {
   let app = Rc::new(App::new());
-  let mut view = View::new(app.clone());
+  let view = View::new();
   let controller = Controller::new(app.clone());
 
   {

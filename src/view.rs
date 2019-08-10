@@ -1,14 +1,7 @@
 pub mod element;
 
-use super::console::*;
-use crate::app::{App, Message};
-use crate::controller::ControllerMessage;
 use crate::types::*;
 use crate::view::element::Element;
-use std::cell::RefCell;
-use std::rc::Rc;
-use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
 
 pub enum ViewMessage {
   ShowNews(Vec<News>, &'static str, u32),
@@ -16,21 +9,11 @@ pub enum ViewMessage {
   ShowComment(Item, &'static str, u32),
 }
 
-fn remove_first(s: &str) -> &str {
-  let mut chars = s.chars();
-  chars.next();
-  chars.as_str()
-}
-
-pub struct View {
-  app: RefCell<Rc<App>>,
-}
+pub struct View {}
 
 impl View {
-  pub fn new(app: Rc<App>) -> View {
-    View {
-      app: RefCell::new(app),
-    }
+  pub fn new() -> View {
+    View {}
   }
 
   fn bind_more(&mut self, pathname: &'static str, index: u32) {
@@ -53,7 +36,7 @@ impl View {
     }
   }
 
-  pub fn show_comment(&mut self, item: &Item, pathname: &'static str, index: u32) {
+  pub fn show_comment(&mut self, item: &Item, _pathname: &'static str, _index: u32) {
     if let Some(mut more) = Element::qs("#more") {
       if let Some(a) = more.qs_from("a") {
         more.remove_child(a);
@@ -146,7 +129,7 @@ impl View {
     }
   }
 
-  pub fn show_user(&mut self, user: &User, pathname: &'static str, uid: &'static str) {
+  pub fn show_user(&mut self, user: &User, _pathname: &'static str, _uid: &'static str) {
     if let Some(mut more) = Element::qs("#more") {
       if let Some(a) = more.qs_from("a") {
         more.remove_child(a);

@@ -102,7 +102,7 @@ impl Controller {
         }
       }) as Box<FnMut(JsValue)>);
 
-      let endpoint = Endpoint::get_url(pathname, index);
+      let endpoint = get_url(pathname, index);
       Fetch::get_json(&endpoint).then(&done);
       done.forget();
     };

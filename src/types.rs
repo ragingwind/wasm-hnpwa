@@ -41,28 +41,8 @@ pub struct User {
   pub karma: u64,
 }
 
-pub enum Endpoint {
-  News,
-  Newest,
-  Ask,
-  Show,
-  Jobs,
-}
-
-impl Endpoint {
-  pub fn as_str(&self, page: u32) -> String {
-    match self {
-      Endpoint::News => format!("https://api.hnpwa.com/v0/news/{}.json", page),
-      Endpoint::Newest => format!("https://api.hnpwa.com/v0/newest/{}.json", page),
-      Endpoint::Ask => format!("https://api.hnpwa.com/v0/ask/{}.json", page),
-      Endpoint::Show => format!("https://api.hnpwa.com/v0/show/{}.json", page),
-      Endpoint::Jobs => format!("https://api.hnpwa.com/v0/jobs/{}.json", page),
-    }
-  }
-
-  pub fn get_url(item_type: &str, page: u32) -> String {
-    format!("https://api.hnpwa.com/v0/{}/{}.json", item_type, page)
-  }
+pub fn get_url(item_type: &str, page: u32) -> String {
+  format!("https://api.hnpwa.com/v0/{}/{}.json", item_type, page)
 }
 
 pub fn to_static_str(s: String) -> &'static str {
