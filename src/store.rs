@@ -22,7 +22,7 @@ pub struct Item {
   pub user: Option<String>,
   pub time: u64,
   pub time_ago: String,
-  pub content: Option<String>,
+  pub content: String,
   pub deleted: Option<bool>,
   pub dead: Option<bool>,
   pub r#type: String,
@@ -32,6 +32,15 @@ pub struct Item {
   pub level: Option<u64>,
   pub comments_count: u64,
 }
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct User {
+  pub id: String,
+  pub created: String,
+  pub created_time: u64,
+  pub karma: u64,
+}
+
 pub enum Endpoint {
   News,
   Newest,

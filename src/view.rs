@@ -12,7 +12,7 @@ use wasm_bindgen::JsCast;
 
 pub enum ViewMessage {
   ShowNews(Vec<News>, &'static str, u32),
-  ShowDetail(Item, &'static str, u32),
+  ShowUser(User, &'static str, &'static str),
 }
 
 fn remove_first(s: &str) -> &str {
@@ -43,7 +43,12 @@ impl View {
 
   fn bind_more(&mut self, pathname: &'static str, index: u32) {
     if let Some(mut more) = Element::qs("#more") {
-      more.set_href(&format!("#/{}&{}", pathname, index));
+      if let Some(a) = more.qs_from("a") {
+        more.remove_child(a);
+      }
+
+      let html: String = format!("<a href='#/{}&{}'>More...</a>", pathname, index);
+      more.set_inner_html(html.to_string());
     }
   }
 
@@ -69,13 +74,12 @@ impl View {
     use self::ViewMessage::*;
     match method_name {
       ShowNews(news, pathname, index) => self.show_news(&news, pathname, index),
-      ShowDetail(item, pathname, index) => self.show_detail(&item, pathname, index),
+      ShowUser(user, pathname, uid) => self.show_user(&user, pathname, uid),
     }
   }
 
   pub fn show_news(&mut self, news: &Vec<News>, pathname: &'static str, index: u32) {
     self.bind_more(pathname, if index < 10 { index + 1 } else { index });
-
     if let Some(mut section) = Element::qs("#content") {
       if let Some(div) = section.qs_from("div") {
         section.remove_child(div);
@@ -88,26 +92,33 @@ impl View {
           div.append_child(&mut ul);
 
           let mut items = String::new();
+
           for item in news.iter() {
+            let points = match item.points {
+              Some(points) => points,
+              None => 0,
+            };
+            let domain = match &item.domain {
+              Some(domain) => domain,
+              None => "",
+            };
+            let user = match &item.user {
+              Some(user) => user,
+              None => "John Doe",
+            };
+
             items.push_str(&format!(
               "<li class='item'>
-                  <div class='points'>{:?}</div>
+                  <div class='points'>{}</div>
                   <div class='content'>
-                    <div class='detail'><a href='#/detail&{}'>{:?}</a></div>
-                    <div class='info'> by {:?} | {} comments</div>
+                    <div class='detail'>
+                      <span><a href='{}' target='_blank'>{}</a></span>
+                      <span class='domain'>{}</span>
+                    </div>
+                    <div class='info'> by <a href='#/user&{}'>{}</a> | {} comments</div>
                   </div>
                 </li>",
-              match item.points {
-                Some(points) => points,
-                None => 0,
-              },
-              item.id,
-              item.title,
-              match &item.user {
-                Some(user) => user,
-                None => "John Doe",
-              },
-              item.comments_count
+              points, item.url, item.title, domain, user, user, item.comments_count
             ));
           }
           ul.set_inner_html(items.to_string());
@@ -116,8 +127,13 @@ impl View {
     }
   }
 
-  pub fn show_detail(&mut self, item: &Item, pathname: &'static str, index: u32) {
-    self.bind_more(pathname, if index < 10 { index + 1 } else { index });
+  pub fn show_user(&mut self, user: &User, pathname: &'static str, uid: &'static str) {
+    console_log!("{}, {}", pathname, uid);
+    if let Some(mut more) = Element::qs("#more") {
+      if let Some(a) = more.qs_from("a") {
+        more.remove_child(a);
+      }
+    }
 
     if let Some(mut section) = Element::qs("#content") {
       if let Some(div) = section.qs_from("div") {
@@ -129,31 +145,13 @@ impl View {
 
         if let Some(mut content) = Element::create_element("div") {
           div.append_child(&mut content);
-
           let html: String = format!(
-            "<div class='item'>
-                <div class='title'>{}</div>
-                <div class='meta'>
-                  <div class='detail'>by {} | {} comments</div>
-                </div>
-                <div class='content'>
-                  {}
-                </div>
+            "<div class='detail'>
+                <div class='title'><h2>{}</h2> <span>joined {}, and has {} karma</div>
               </div>",
-            match &item.title {
-              Some(title) => title.as_str(),
-              None => "No title",
-            },
-            match &item.user {
-              Some(user) => user,
-              None => "John Doe",
-            },
-            item.comments_count,
-            match &item.content {
-              Some(content) => content,
-              None => "",
-            }
+            user.id, user.created_time, user.karma
           );
+
           div.set_inner_html(html);
         }
       }

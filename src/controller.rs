@@ -46,31 +46,58 @@ impl Controller {
     let hash = hash.trim_start_matches("#/");
     let v: Vec<&str> = string_to_static_str(hash.to_string()).split("&").collect();
     let pathname = v[0];
-    let index = v[1].parse::<u32>().unwrap();
 
-    console_log!("{} {}", pathname, index);
+    console_log!("v: {:?}", v);
+
     match pathname {
-      "news" | "newest" | "ask" | "show" | "jobs" => self.get_news(pathname, index),
-      "detail" => self.get_detail(pathname, index),
+      "news" | "newest" | "ask" | "show" | "jobs" => {
+        let index = v[1].parse::<u32>().unwrap();
+        console_log!("news {}", index);
+        self.get_news(pathname, index);
+      }
+      // "detail" => self.get_detail(pathname, index),
+      "user" => {
+        console_log!("user {}", v[1]);
+        self.get_user(pathname, v[1]);
+      }
       _ => self.get_news("news", 1),
     }
   }
 
-  pub fn get_detail(&self, pathname: &'static str, index: u32) {
+  // pub fn get_detail(&self, pathname: &'static str, index: u32) {
+  //   let app = self.app.clone();
+  //   let fetch = move || {
+  //     let done = Closure::wrap(Box::new(move |json: JsValue| {
+  //       let item: Item = json.into_serde().unwrap();
+  //       console_log!("data: {:?}", item);
+
+  //       if let Ok(app) = &(app.try_borrow_mut()) {
+  //         app.add_message(Message::View(ViewMessage::ShowDetail(
+  //           item, pathname, index,
+  //         )));
+  //       }
+  //     }) as Box<FnMut(JsValue)>);
+
+  //     let endpoint = format!("https://api.hnpwa.com/v0/item/{}.json", index);
+  //     Fetch::get_json(&endpoint).then(&done);
+  //     done.forget();
+  //   };
+
+  //   fetch();
+  // }
+
+  pub fn get_user(&self, pathname: &'static str, uid: &'static str) {
     let app = self.app.clone();
     let fetch = move || {
       let done = Closure::wrap(Box::new(move |json: JsValue| {
-        let item: Item = json.into_serde().unwrap();
-        console_log!("data: {:?}", item);
+        let user: User = json.into_serde().unwrap();
 
         if let Ok(app) = &(app.try_borrow_mut()) {
-          app.add_message(Message::View(ViewMessage::ShowDetail(
-            item, pathname, index,
-          )));
+          app.add_message(Message::View(ViewMessage::ShowUser(user, pathname, uid)));
         }
       }) as Box<FnMut(JsValue)>);
 
-      let endpoint = format!("https://api.hnpwa.com/v0/item/{}.json", index);
+      let endpoint = format!("https://api.hnpwa.com/v0/user/{}.json", uid);
       Fetch::get_json(&endpoint).then(&done);
       done.forget();
     };

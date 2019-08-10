@@ -53,19 +53,22 @@ pub fn app() {
         "show" => "show",
         "jobs" => "jobs",
         "detail" => "detail",
+        "user" => "user",
         _ => "news",
       };
 
-      let mut page = 1;
-      if hashes.len() > 1 {
-        let page_num = hashes[1].parse::<u32>().unwrap();
-        page = match page_num {
-          1...10 => page_num,
-          _ => 1,
-        }
-      }
+      // let mut page = 1;
+      // if hashes.len() > 1 {
+      //   let page_num = hashes[1].parse::<u32>().unwrap();
+      //   page = match page_num {
+      //     1...10 => page_num,
+      //     _ => 1,
+      //   }
+      // }
 
-      let hash = format!("#/{}&{}", hash, page);
+      let hash = format!("#/{}&{}", hash, hashes[1]);
+
+      console_log!("hash: {}", hash);
 
       app.add_message(Message::Controller(ControllerMessage::ChangePage(
         string_to_static_str(hash),
