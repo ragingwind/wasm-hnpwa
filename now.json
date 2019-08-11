@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "name": "wasm-hnpwa",
+  "alias": ["wasm-hnpwa.now.sh"],
+  "routes": [
+    { "src": "/service-worker.js", "dest": "/dist/service-worker.js" },
+    { "src": "/pkg", "dest": "./pkg" },
+    { "src": "/(.*)", "dest": "/dist/$1" }
+  ]
+}
