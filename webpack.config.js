@@ -13,13 +13,10 @@ module.exports = {
   },
   plugins: [
     new GenerateSW({
-      // include: [/\.html$/, /\.js$/, /\.css$/, /\.png$/, /\.wasm $/],
-      // globPatterns: ['**/*.{js,css,html}'],
-      globDirectory: './',
       runtimeCaching: [
         {
           urlPattern: /^http[s|]?.*/,
-          handler: 'staleWhileRevalidate'
+          handler: 'StaleWhileRevalidate'
         }
       ],
       clientsClaim: true,
