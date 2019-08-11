@@ -1,3 +1,6 @@
+// element mod from
+// https://github.com/rustwasm/wasm-bindgen/tree/master/examples/todomvc
+
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::EventTarget;
@@ -326,47 +329,47 @@ impl Element {
     text
   }
 
-  // /// Sets the value for the element in `self.el` (The element must be an input)
-  // pub fn set_value(&mut self, value: &str) {
-  //   if let Some(el) = self.el.take() {
-  //     if let Some(el) = wasm_bindgen::JsCast::dyn_ref::<web_sys::HtmlInputElement>(&el) {
-  //       el.set_value(&value);
-  //     }
-  //     self.el = Some(el);
-  //   }
-  // }
+  /// Sets the value for the element in `self.el` (The element must be an input)
+  pub fn set_value(&mut self, value: &str) {
+    if let Some(el) = self.el.take() {
+      if let Some(el) = wasm_bindgen::JsCast::dyn_ref::<web_sys::HtmlInputElement>(&el) {
+        el.set_value(&value);
+      }
+      self.el = Some(el);
+    }
+  }
 
-  // /// Gets the value for the element in `self.el` (The element must be an input)
-  // pub fn value(&mut self) -> String {
-  //   let mut v = String::new();
-  //   if let Some(el) = self.el.take() {
-  //     if let Some(el) = wasm_bindgen::JsCast::dyn_ref::<web_sys::HtmlInputElement>(&el) {
-  //       v = el.value();
-  //     }
-  //     self.el = Some(el);
-  //   }
-  //   v
-  // }
+  /// Gets the value for the element in `self.el` (The element must be an input)
+  pub fn value(&mut self) -> String {
+    let mut v = String::new();
+    if let Some(el) = self.el.take() {
+      if let Some(el) = wasm_bindgen::JsCast::dyn_ref::<web_sys::HtmlInputElement>(&el) {
+        v = el.value();
+      }
+      self.el = Some(el);
+    }
+    v
+  }
 
-  // /// Sets the checked state for the element in `self.el` (The element must be an input)
-  // pub fn set_checked(&mut self, checked: bool) {
-  //   if let Some(el) = self.el.take() {
-  //     if let Some(el) = wasm_bindgen::JsCast::dyn_ref::<web_sys::HtmlInputElement>(&el) {
-  //       el.set_checked(checked);
-  //     }
-  //     self.el = Some(el);
-  //   }
-  // }
+  /// Sets the checked state for the element in `self.el` (The element must be an input)
+  pub fn set_checked(&mut self, checked: bool) {
+    if let Some(el) = self.el.take() {
+      if let Some(el) = wasm_bindgen::JsCast::dyn_ref::<web_sys::HtmlInputElement>(&el) {
+        el.set_checked(checked);
+      }
+      self.el = Some(el);
+    }
+  }
 
-  // /// Gets the checked state for the element in `self.el` (The element must be an input)
-  // pub fn checked(&mut self) -> bool {
-  //   let mut checked = false;
-  //   if let Some(el) = self.el.take() {
-  //     if let Some(el) = wasm_bindgen::JsCast::dyn_ref::<web_sys::HtmlInputElement>(&el) {
-  //       checked = el.checked();
-  //     }
-  //     self.el = Some(el);
-  //   }
-  //   checked
-  // }
+  /// Gets the checked state for the element in `self.el` (The element must be an input)
+  pub fn checked(&mut self) -> bool {
+    let mut checked = false;
+    if let Some(el) = self.el.take() {
+      if let Some(el) = wasm_bindgen::JsCast::dyn_ref::<web_sys::HtmlInputElement>(&el) {
+        checked = el.checked();
+      }
+      self.el = Some(el);
+    }
+    checked
+  }
 }

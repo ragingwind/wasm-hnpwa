@@ -12,13 +12,6 @@ pub struct App {
   controller: Rc<RefCell<Option<Controller>>>,
   view: Rc<RefCell<Option<View>>>,
   events: RefCell<Vec<Message>>,
-  running: RefCell<bool>,
-}
-
-pub fn exit(message: &str) {
-  let v = wasm_bindgen::JsValue::from_str(&message.to_string());
-  web_sys::console::exception_1(&v);
-  std::process::abort();
 }
 
 impl App {
@@ -27,15 +20,12 @@ impl App {
       controller: Rc::new(RefCell::new(None)),
       view: Rc::new(RefCell::new(None)),
       events: RefCell::new(Vec::new()),
-      running: RefCell::new(false),
     }
   }
 
   pub fn set_controller(&self, controller: Controller) {
     if let Ok(mut controller_data) = self.controller.try_borrow_mut() {
       *controller_data = Some(controller);
-    } else {
-      exit("This might be a deadlock");
     }
   }
 
@@ -45,39 +35,21 @@ impl App {
   }
 
   pub fn add_message(&self, message: Message) {
-    let running = self.running.try_borrow_mut().unwrap().clone();
-
     {
       let mut events = self.events.try_borrow_mut().unwrap();
       events.push(message);
     }
 
     {
-      if !running {
-        self.run();
-      }
+      self.run();
     }
   }
 
   fn run(&self) {
-    {
-      let events = self.events.try_borrow().unwrap();
-      let events_len = events.len().clone();
-      let mut running = self.running.try_borrow_mut().unwrap().clone();
-
-      if events_len == 0 {
-        running = false;
-      } else {
-        running = true;
-      }
-    }
-
     self.next_message();
   }
 
   fn next_message(&self) {
-    let mut running = self.running.try_borrow_mut().unwrap().clone();
-
     let event = {
       if let Ok(mut events) = self.events.try_borrow_mut() {
         Some(events.pop())
@@ -102,8 +74,6 @@ impl App {
         }
       }
       self.run();
-    } else if running == true {
-      running = false;
     }
   }
 }
